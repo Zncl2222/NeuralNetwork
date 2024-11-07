@@ -31,7 +31,7 @@ class Dense(BaseLayer):
 class Network:
     def __init__(self):
         self.layers: list[BaseLayer] = []
-        self.loss_function = None
+        self.loss_function: BaseLayer = None
 
     def add(self, layer: BaseLayer) -> None:
         """Add a layer to the network."""
