@@ -3,6 +3,7 @@ import numpy as np
 from network.nn import Network, Dense
 from network.loss import MeanSquareError
 from network.activation import Tanh
+from network.optimizer import SGD
 
 
 if __name__ == '__main__':
@@ -27,6 +28,8 @@ if __name__ == '__main__':
 
     # Initialize the network
     nn = Network()
+    optimizer = SGD()
+    nn.set_optimizer(optimizer)
     nn.add(Dense(2, 9))
     nn.add(Tanh())
     nn.add(Dense(9, 1))

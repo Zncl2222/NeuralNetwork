@@ -1,5 +1,10 @@
 import numpy as np
 
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from .optimizer import Optimizer
+
 
 class BaseLayer:
     def forward(self, input: np.ndarray):
@@ -8,11 +13,15 @@ class BaseLayer:
     def backward(self, output_error: np.ndarray, learning_rate: float = 0.01):
         raise NotImplementedError
 
+    def set_optimizer(self, optimizer: 'Optimizer'):
+        raise NotImplementedError
+
 
 class Dense(BaseLayer):
     def __init__(self, input_size: int, output_size: int):
         self.weights = np.random.rand(input_size, output_size) - 0.5
         self.bias = np.random.rand(1, output_size) - 0.5
+        self.optimizer: 'Optimizer' = None
 
     def forward(self, input: np.ndarray):
         self.input = input
@@ -23,9 +32,17 @@ class Dense(BaseLayer):
         input_error = np.dot(output_error, self.weights.T)
 
         # Update weights and bias
-        self.weights -= learning_rate * weights_error
-        self.bias -= learning_rate * output_error
+        if self.optimizer:
+            self.optimizer.update(self, weights_error, output_error, learning_rate)
+        else:
+            # Default update if no optimizer is set
+            self.weights -= learning_rate * weights_error
+            self.bias -= learning_rate * output_error
+
         return input_error
+
+    def set_optimizer(self, optimizer: 'Optimizer'):
+        self.optimizer = optimizer
 
 
 class Network:
@@ -40,6 +57,12 @@ class Network:
     def set_loss(self, loss_function) -> None:
         """Set the loss function for the network."""
         self.loss_function = loss_function
+
+    def set_optimizer(self, optimizer: 'Optimizer') -> None:
+        """Set the optimizer for each layer in the network."""
+        for layer in self.layers:
+            if isinstance(layer, Dense):
+                layer.set_optimizer(optimizer)
 
     def forward(self, X: np.ndarray) -> np.ndarray:
         """Forward pass through all layers."""

@@ -1,6 +1,6 @@
 import numpy as np
 
-from nn import BaseLayer
+from .nn import BaseLayer
 
 
 class MeanSquareError(BaseLayer):
